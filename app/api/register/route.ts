@@ -1,3 +1,4 @@
+import sendEmail, { brandedVolunteerEmail, escapeHtml, registrationMailRecipient, registrationMailSender } from '@/lib/utils';
 import {z} from 'zod';
 
 export const runtime='nodejs';
@@ -29,6 +30,36 @@ export async function POST(request:Request){
    cache:'no-store',signal:AbortSignal.timeout(10000)
   });
   if(!response.ok)throw new Error(`Supabase registration insert failed: ${response.status}`);
+  try {
+    await sendEmail({
+        sender: registrationMailSender,
+        receipients: [
+            registrationMailRecipient,
+        ],
+        subject: `New Registration Form:`,
+        message: brandedVolunteerEmail({
+            title: 'New Registration form submission',
+            intro: 'A new message has been submitted through the USFJ event registration form.',
+            content: `
+              <div style="padding:20px;background:#f4f6fb;border-left:4px solid #db9e04;">
+                <p style="margin:0 0 10px;"><strong>Name:</strong> ${escapeHtml(d.name)}</p>
+                <p style="margin:0 0 10px;"><strong>Email:</strong> <a href="mailto:${escapeHtml(d.email)}" style="color:#142560;">${escapeHtml(d.email)}</a></p>
+                <p style="margin:0 0 10px;"><strong>Type:</strong> ${escapeHtml(d.type)}</p>
+                <p style="margin:0 0 10px;"><strong>Number of Attendees:</strong> ${escapeHtml(d.attendees.toString())}</p>
+                <p style="margin:0 0 10px;"><strong>Phone:</strong> ${escapeHtml(d.phone)}</p>
+                <p style="margin:0 0 10px;"><strong>City:</strong> ${escapeHtml(d.city)}</p>
+                <p style="margin:0;"><strong>Prayer Request:</strong><br />${
+                    d.prayer
+                        ? escapeHtml(d.prayer).replace(/\n/g, '<br />')
+                        : 'Not provided'
+                }</p>
+              </div>
+            `,
+        }),
+    });
+} catch (emailError) {
+    console.error('Contact admin email error:', emailError);
+}
   return Response.json({success:true},{headers:{'Cache-Control':'no-store'}});
  }catch(error){console.error('Registration save failed',error);return Response.json({error:'We couldn’t save your registration. Your entries are still here. Please try again.'},{status:503})}
 }
