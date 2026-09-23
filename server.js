@@ -6,7 +6,7 @@ const require = module.createRequire(import.meta.url)
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 
-const dir = path.join(__dirname)
+const dir = path.join(__dirname) 
 
 process.env.NODE_ENV = 'production'
 process.chdir(__dirname)
