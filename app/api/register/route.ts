@@ -1,4 +1,4 @@
-import sendEmail, { brandedVolunteerEmail, escapeHtml, registrationMailRecipient, registrationMailSender } from '@/lib/utils';
+import sendEmail, { brandedVolunteerEmail, escapeHtml, registrationMailRecipient, registrationMailSender } from "./utils"
 import {z} from 'zod';
 
 export const runtime='nodejs';
